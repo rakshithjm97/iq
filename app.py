@@ -21,56 +21,52 @@ def image_to_base64(image_path):
 
 # Set up custom CSS for background and UI
 def set_background():
-    # Use relative paths to your images in the app directory
-    image_path1 = r"D:\New\Learn.ai\img\pexels-rickyrecap-1926988.jpg"  # Adjust the path if needed
-    image_path2 = r"D:\New\Learn.ai\img\pexels-lilartsy-1925536.jpg"  # Adjust the path to your new image
+    # Direct URLs to the images
+    image_url_1 = "https://raw.githubusercontent.com/rakshithjm97/iq/main/pexels-rickyrecap-1926988.jpg"
+    image_url_2 = "https://raw.githubusercontent.com/rakshithjm97/iq/main/pexels-lilartsy-1925536.jpg"
     
-    # Get base64 encoded images
-    image_base64_1 = image_to_base64(image_path1)
-    image_base64_2 = image_to_base64(image_path2)
-    
-    if image_base64_1 and image_base64_2:
-        st.markdown(
-            f"""
-            <style>
-            .stApp {{
-                background: url(data:image/jpg;base64,{image_base64_1}) no-repeat center center fixed;
-                background-size: cover;
-            }}
-            .stApp::after {{
-                content: "";
-                background: url(data:image/jpg;base64,{image_base64_2}) no-repeat center center fixed;
-                background-size: cover;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: -1;
-            }}
-            .header {{
-                text-align: center;
-                font-size: 48px;
-                font-weight: bold;
-                margin-top: 20px;
-                color: white;
-            }}
-            .description {{
-                text-align: center;
-                font-size: 24px;
-                margin-top: 10px;
-                color: white;
-            }}
-            .question {{
-                text-align: center;
-                font-size: 24px;
-                margin-top: 20px;
-                color: white;
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+    # Set the background using the URLs
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background: url({image_url_1}) no-repeat center center fixed;
+            background-size: cover;
+        }}
+        .stApp::after {{
+            content: "";
+            background: url({image_url_2}) no-repeat center center fixed;
+            background-size: cover;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }}
+        .header {{
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: white;
+        }}
+        .description {{
+            text-align: center;
+            font-size: 24px;
+            margin-top: 10px;
+            color: white;
+        }}
+        .question {{
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            color: white;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 def get_ai_response(question):
     try:
