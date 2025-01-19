@@ -7,8 +7,7 @@ from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 import torch # Required for Hugging Face models
 
 # Set up OpenAI API key handling directly from environment variables
-openai.api_key = 'sk-9wnVyzYO0xzlJ-0H_OgvWGvBnnSe_9BCQfYMOIaTkLT3BlbkFJ83hEmXWmvhT-bwv2L_ITbB7BL8s0fz97kCVjLxH90A'  # Replace with your actual API key
-  # Replace with your actual API key
+openai.api_key = 'sk-9wnVyzYO0xzlJ-0H_OgvWGvBnnSe_9BCQfYMOIaTkLT3BlbkFJ83hEmXWmvhT-bwv2L_ITbB7BL8s0fz97kCVjLxH90A' 
 
 # Convert image to base64 encoding
 def image_to_base64(image_path):
@@ -84,7 +83,7 @@ def get_ai_response(question):
 
 def get_meta_llm_response(question):
     # Load the model and tokenizer from Hugging Face
-    model_name = "facebook/opt-1.3b"  # Example model, replace with the actual model you want to use
+    model_name = "facebook/opt-1.3b" 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name)
     
