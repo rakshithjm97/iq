@@ -5,9 +5,13 @@ import base64
 import openai
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 import torch # Required for Hugging Face models
+import os
+
+
+
 
 # Set up OpenAI API key handling directly from environment variables
-openai.api_key = 'sk-_viA0jioAA0sozzb59PEZdgebSwWtfjH5gNRoaarjIT3BlbkFJAY86LSMrOxYPn4fBq7zP6vFJmxz2REUtA924b5XAQA' 
+openai_api_key = os.environ["OPENAI_API_KEY"] 
 
 # Convert image to base64 encoding
 def image_to_base64(image_path):
