@@ -35,6 +35,9 @@ def call_openai_api(prompt):
         st.warning("Rate limit exceeded. Switching to Dolphin 2.9.1 Llama 3 70B model.")
         # Fallback to Dolphin 2.9.1 Llama 3 70B model
         return call_dolphin_llama_model(prompt)
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return None
 
 # Function to call Dolphin 2.9.1 Llama 3 70B model
 def call_dolphin_llama_model(prompt):
@@ -103,22 +106,7 @@ def set_background():
         unsafe_allow_html=True
     )
 
-# Initialize the AIML kernel
-kernel = aiml.Kernel()
-try:
-    kernel.learn("std-startup.xml")
-    kernel.respond("load aiml b")
-except Exception as e:
-    print(f"Error initializing AIML kernel: {e}")
 
-def get_ai_response(question, kernel):
-    try:
-        response = kernel.respond(question)
-        if not response:
-            return "Sorry, I don't have an answer for that."
-        return response
-    except Exception as e:
-        return str(e)
 
 # Import necessary libraries for the commented-out function
 #from transformers import AutoTokenizer, AutoModelForCausalLM
