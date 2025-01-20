@@ -13,6 +13,9 @@ import requests
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
+# Initialize AIML kernel
+kernel = aiml.Kernel()
+
 # Convert image to base64 encoding
 def image_to_base64(image_path):
     try:
@@ -124,6 +127,11 @@ def set_background():
 #     response = generator(question, max_length=150, num_return_sequences=1)
 #     return response[0]['generated_text']
 
+# Define the get_ai_response function
+def get_ai_response(question, kernel):
+    # Placeholder implementation
+    return "This is a placeholder response."
+
 def main():
     # Set the background and custom styles
     set_background()
@@ -137,19 +145,10 @@ def main():
         # Create a scrollable container for questions and answers
         with st.container():
             st.markdown('<div class="question">Ask Mia a question:</div>', unsafe_allow_html=True)
-            st.text_input("Enter your name:", key="name_input")
-            question = st.text_input("", 
-                                   placeholder="Type your question here...",
-                                   help="Ask any question and Mia will help you learn!")
-            
+            question = st.text_input("Question:", label_visibility="collapsed")
             if question:
-                with st.spinner('Mia is thinking...'):
-                    answer = get_ai_response(question, kernel)
-                    if answer:
-                        st.markdown(
-                            f'<div class="answer-container">{answer}</div>',
-                            unsafe_allow_html=True
-                        )
+                answer = get_ai_response(question, kernel)
+                st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)
 
         # Add a fixed footer
         st.markdown(
