@@ -7,6 +7,7 @@ import aiml
 #from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 #import torch # Required for Hugging Face models
 import os
+import requests
 
 # Set up environment variables
 load_dotenv()
@@ -37,9 +38,21 @@ def call_openai_api(prompt):
 
 # Function to call Dolphin 2.9.1 Llama 3 70B model
 def call_dolphin_llama_model(prompt):
-    # Implement the call to Dolphin 2.9.1 Llama 3 70B model here
-    # This is a placeholder implementation
-    return "Response from Dolphin 2.9.1 Llama 3 70B model"
+    api_url = "https://api.dolphin.com/v2.9.1/llama3-70b"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    }
+    payload = {
+        "prompt": prompt
+    }
+    
+    response = requests.post(api_url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        return response.json().get("response", "No response field in API response")
+    else:
+        return f"Error: {response.status_code} - {response.text}"
 
 # Set up custom CSS for background and UI
 def set_background():
@@ -160,10 +173,6 @@ def main():
             unsafe_allow_html=True
         )
 
-    # Example usage
-    prompt = ""
-    response = get_ai_response(prompt, kernel)
-    st.write(response)
-
+   
 if __name__ == "__main__":
     main()
