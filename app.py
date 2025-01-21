@@ -4,10 +4,16 @@ from dotenv import load_dotenv
 import base64
 import openai
 import requests
+from transformers import pipeline,AutoTokenizer, AutoModelForCausalLM
 
 # Set up environment variables
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
+
+if not openai_api_key:
+    st.error("OpenAI API key not found. Please set it in the environment variables.")
+
+openai.api_key = openai_api_key
 
 # Convert image to base64 encoding
 def image_to_base64(image_path):
@@ -16,7 +22,6 @@ def image_to_base64(image_path):
             return base64.b64encode(img_file.read()).decode('utf-8')
     except Exception as e:
         st.error(f"Error converting image to base64: {e}")
-        return None
 
 # Function to call OpenAI API with fallback to Dolphin 2.9.1 Llama 3 70B model
 def call_openai_api(prompt):
@@ -36,103 +41,31 @@ def call_openai_api(prompt):
             return None
 
 # Function to call Dolphin 2.9.1 Llama 3 70B model
+# Initialize the pipeline
+pipe = pipeline("text-generation", model="cognitivecomputations/dolphin-2.9.1-llama-3-70b")
 def call_dolphin_llama_model(prompt):
-    api_url = "https://api.dolphin.com/v2.9.1/llama3-70b"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"
-    }
-    payload = {
-        "prompt": prompt
-    }
-    
-    response = requests.post(api_url, headers=headers, json=payload)
-    
-    if response.status_code == 200:
-        return response.json().get("response", "No response field in API response")
-    else:
-        return f"Error: {response.status_code} - {response.text}"
+    messages = [{"role": "user", "content": prompt}]
+    response = pipe(messages)
+    return response[0]['generated_text']
 
 # Set up custom CSS for background and UI
 def set_background():
     # Direct URLs to the images
     image_url_1 = "https://raw.githubusercontent.com/rakshithjm97/iq/main/pexels-rickyrecap-1926988.jpg"
-    image_url_2 = "https://raw.githubusercontent.com/rakshithjm97/iq/main/pexels-lilartsy-1925536.jpg"
-    
-    # Set the background using the URLs
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background: url({image_url_1}) no-repeat center center fixed;
-            background-size: cover;
-        }}
-        .stApp::after {{
-            content: "";
-            background: url({image_url_2}) no-repeat center center fixed;
-            background-size: cover;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }}
-        .header {{
-            text-align: center;
-            font-size: 48px;
-            font-weight: bold;
-            margin-top: 20px;
-            color: white;
-        }}
-        .description {{
-            text-align: center;
-            font-size: 24px;
-            margin-top: 10px;
-            color: white;
-        }}
-        .question {{
-            text-align: center;
-            font-size: 24px;
-            margin-top: 20px;
-            color: white;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
+
+def get_response_from_openai(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
     )
-
-# Import necessary libraries for the commented-out function
-#from transformers import AutoTokenizer, AutoModelForCausalLM
-
-# def get_meta_llm_response(question):
-#     # Load the model and tokenizer from Hugging Face
-#     model_name = "facebook/opt-1.3b" 
-#     tokenizer = AutoTokenizer.from_pretrained(model_name)
-#     model = AutoModelForCausalLM.from_pretrained(model_name)
     
-#     # Create a pipeline for text generation
-#     generator = pipeline('text-generation', model=model, tokenizer=tokenizer)
-    
-#     # Generate a response
-#     response = generator(question, max_length=150, num_return_sequences=1)
-#     return response[0]['generated_text']
-
-# Define the get_ai_response function
-def get_ai_response(question):
-    try:
-        response = openai.Completion.create(
-            engine="davinci-codex",
-            prompt=question,
-            max_tokens=150
-        )
-        return response.choices[0].text.strip()
-    except openai.error.RateLimitError:
-        st.warning("Rate limit exceeded. Switching to Dolphin 2.9.1 Llama 3 70B model.")
-        return call_dolphin_llama_model(question)
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        return None
+    if response.choices:
+        return response.choices[0].message['content']
+    else:
+        return "No response from OpenAI API"
 
 def main():
     # Set the background and custom styles
@@ -148,7 +81,7 @@ def main():
         user_input = st.text_input("Type your question here:")
 
         if user_input:
-            response = call_openai_api(user_input)
+            response = get_response_from_openai(user_input)
             st.markdown(f"**Response:** {response}")
 
         # Add a fixed footer
