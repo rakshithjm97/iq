@@ -3,18 +3,11 @@ import os
 from dotenv import load_dotenv
 import base64
 import openai
-import aiml
-#from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-#import torch # Required for Hugging Face models
-import os
 import requests
 
 # Set up environment variables
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
-
-# Initialize AIML kernel
-kernel = aiml.Kernel()
 
 # Convert image to base64 encoding
 def image_to_base64(image_path):
@@ -34,13 +27,13 @@ def call_openai_api(prompt):
             max_tokens=150
         )
         return response.choices[0].text.strip()
-    except openai.error.RateLimitError:
-        st.warning("Rate limit exceeded. Switching to Dolphin 2.9.1 Llama 3 70B model.")
-        # Fallback to Dolphin 2.9.1 Llama 3 70B model
-        return call_dolphin_llama_model(prompt)
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        return None
+    except openai.error.OpenAIError as e:
+        if "Rate limit" in str(e):
+            st.warning("Rate limit exceeded. Switching to Dolphin 2.9.1 Llama 3 70B model.")
+            return call_dolphin_llama_model(prompt)
+        else:
+            st.error(f"An error occurred: {e}")
+            return None
 
 # Function to call Dolphin 2.9.1 Llama 3 70B model
 def call_dolphin_llama_model(prompt):
@@ -109,8 +102,6 @@ def set_background():
         unsafe_allow_html=True
     )
 
-
-
 # Import necessary libraries for the commented-out function
 #from transformers import AutoTokenizer, AutoModelForCausalLM
 
@@ -128,9 +119,20 @@ def set_background():
 #     return response[0]['generated_text']
 
 # Define the get_ai_response function
-def get_ai_response(question, kernel):
-    # Placeholder implementation
-    return "This is a placeholder response."
+def get_ai_response(question):
+    try:
+        response = openai.Completion.create(
+            engine="davinci-codex",
+            prompt=question,
+            max_tokens=150
+        )
+        return response.choices[0].text.strip()
+    except openai.error.RateLimitError:
+        st.warning("Rate limit exceeded. Switching to Dolphin 2.9.1 Llama 3 70B model.")
+        return call_dolphin_llama_model(question)
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return None
 
 def main():
     # Set the background and custom styles
@@ -142,24 +144,22 @@ def main():
         st.markdown('<div class="header">Welcome to AI Tutor (Mia)</div>', unsafe_allow_html=True)
         st.markdown('<div class="description">Your AI-powered tutor to help you with anything you need!</div>', unsafe_allow_html=True)
         
-        # Create a scrollable container for questions and answers
-        with st.container():
-            st.markdown('<div class="question">Ask Mia a question:</div>', unsafe_allow_html=True)
-            question = st.text_input("Question:", label_visibility="collapsed")
-            if question:
-                answer = get_ai_response(question, kernel)
-                st.markdown(f'<div class="answer">{answer}</div>', unsafe_allow_html=True)
+        # Input field for user to type their question
+        user_input = st.text_input("Type your question here:")
+
+        if user_input:
+            response = call_openai_api(user_input)
+            st.markdown(f"**Response:** {response}")
 
         # Add a fixed footer
         st.markdown(
             """
             <div class="footer">
-                <p>Powered by OpenAI <p>
+                <p>Powered by OpenAI</p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-   
 if __name__ == "__main__":
     main()
