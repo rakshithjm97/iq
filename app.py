@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 import base64
 import openai
 import requests
-from transformers import pipeline,AutoTokenizer, AutoModelForCausalLM
+from transformers.pipelines import pipeline  # Updated import for pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 
 # Set up environment variables
 load_dotenv()
@@ -42,30 +44,67 @@ def call_openai_api(prompt):
 
 # Function to call Dolphin 2.9.1 Llama 3 70B model
 # Initialize the pipeline
-pipe = pipeline("text-generation", model="cognitivecomputations/dolphin-2.9.1-llama-3-70b")
+pipe = pipeline("text-generation", model="cognitivecomputations/dolphin-2.9.1-llama-3-70b", tokenizer=AutoTokenizer.from_pretrained("cognitivecomputations/dolphin-2.9.1-llama-3-70b"), device=0 if torch.cuda.is_available() else -1)
+
 def call_dolphin_llama_model(prompt):
     messages = [{"role": "user", "content": prompt}]
-    response = pipe(messages)
+    response = pipe(prompt, max_length=150)
     return response[0]['generated_text']
 
 # Set up custom CSS for background and UI
 def set_background():
-    # Direct URLs to the images
-    image_url_1 = "https://raw.githubusercontent.com/rakshithjm97/iq/main/pexels-rickyrecap-1926988.jpg"
+    image_url = "https://raw.githubusercontent.com/rakshithjm97/iq/main/pexels-rickyrecap-1926988.jpg"
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("{image_url}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        .header {{
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #FFFFFF;
+            text-align: center;
+        }}
+        .description {{
+            font-size: 1.2em;
+            color: #FFFFFF;
+            text-align: center;
+        }}
+        .footer {{
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            color: black;
+            text-align: center;
+            padding: 10px;
+        }}
+        </style>
+        """, unsafe_allow_html=True
+    )
 
 def get_response_from_openai(prompt):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    
-    if response.choices:
-        return response.choices[0].message['content']
-    else:
-        return "No response from OpenAI API"
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        if response.choices:
+            return response.choices[0].message['content']
+        else:
+            return "No response from OpenAI API"
+    except Exception as e:
+        st.error(f"Error calling OpenAI API: {e}")
+        return None
 
 def main():
     # Set the background and custom styles
