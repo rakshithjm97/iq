@@ -20,12 +20,13 @@ def call_model():
     messages = [
         {"role": "user", "content": "Who are you?"},
     ]
-    pipe = pipeline("text-generation", model="cognitivecomputations/dolphin-2.9.1-llama-3-70b")
+    pipe = pipeline("text-generation", model="EleutherAI/gpt-neo-125m")
     return pipe(messages)
 
 # Load model directly
-tokenizer = AutoTokenizer.from_pretrained("cognitivecomputations/dolphin-2.9.1-llama-3-70b")
-model = AutoModelForCausalLM.from_pretrained("cognitivecomputations/dolphin-2.9.1-llama-3-70b")
+
+tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-125m")
+model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-125m")
 
 # Set up custom CSS for background and UI
 def set_background():
