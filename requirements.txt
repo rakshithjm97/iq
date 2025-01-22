@@ -1,2 +1,3 @@
 streamlight
 transformers
+torch
