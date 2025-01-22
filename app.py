@@ -1,9 +1,10 @@
 import streamlit as st
-import os
-from dotenv import load_dotenv
 import base64
-from transformers.pipelines import pipeline  # Updated import for pipeline
+from transformers.pipelines import pipeline  
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import requests
+from requests.exceptions import ConnectionError
+import sys
 import torch
 
 # Convert image to base64 encoding
@@ -15,14 +16,16 @@ def image_to_base64(image_path):
         st.error(f"Error converting image to base64: {e}")
 
 # Function to call Dolphin 2.9.1 Llama 3 70B model
-# Initialize the pipeline
-pipe = pipeline("text-generation", model="cognitivecomputations/dolphin-2.9.1-llama-3-70b", 
-                tokenizer=AutoTokenizer.from_pretrained("cognitivecomputations/dolphin-2.9.1-llama-3-70b"), 
-                device=0 if torch.cuda.is_available() else -1)
+def call_model():
+    messages = [
+        {"role": "user", "content": "Who are you?"},
+    ]
+    pipe = pipeline("text-generation", model="cognitivecomputations/dolphin-2.9.1-llama-3-70b")
+    return pipe(messages)
 
-def call_dolphin_llama_model(prompt):
-    response = pipe(prompt, max_length=150)
-    return response[0]['generated_text']
+# Load model directly
+tokenizer = AutoTokenizer.from_pretrained("cognitivecomputations/dolphin-2.9.1-llama-3-70b")
+model = AutoModelForCausalLM.from_pretrained("cognitivecomputations/dolphin-2.9.1-llama-3-70b")
 
 # Set up custom CSS for background and UI
 def set_background():
@@ -76,7 +79,7 @@ def main():
 
         if user_input:
             # Use Dolphin 2.9.1 Llama 3 70B model to get response
-            response = call_dolphin_llama_model(user_input)
+            response = call_model(user_input)
             st.markdown(f"**Response:** {response}")
 
         # Add a fixed footer
@@ -88,6 +91,20 @@ def main():
             """,
             unsafe_allow_html=True
         )
+
+    # Define your custom class
+    class MyCustomClass(torch.nn.Module):
+        def __init__(self):
+            super(MyCustomClass, self).__init__()
+
+        def forward(self, x):
+            return x
+
+    # Register the custom class
+    torch.classes.load_library("D:/New/Learn.ai/path_to_your_custom_class_library.so")
+
+    # Now you can instantiate your custom class
+    my_instance = torch.classes.my_namespace.MyCustomClass()
 
 if __name__ == "__main__":
     main()
